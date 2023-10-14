@@ -30,6 +30,7 @@ The `train.py` script is used to preprocess the data and train a machine learnin
 2. **Data Preprocessing Functions**: The script defines several functions for data preprocessing, such as `_handle_cpu_speed` to handle CPU speed values.
 
 3. **Data Preprocessing**: The `preprocess` function is used for data preprocessing. It performs the following operations:
+
    - Removing duplicate rows
    - Dropping columns with too many missing values
    - Converting categorical columns to one-hot encoding
@@ -55,6 +56,7 @@ The `train.py` script is used to preprocess the data and train a machine learnin
 To use this project, follow these steps:
 
 1. Download the dataset from Kaggle using the following command:
+
    ```
    kaggle datasets download -d talhabarkaatahmad/laptop-prices-dataset-october-2023
    ```
@@ -62,19 +64,24 @@ To use this project, follow these steps:
 2. Rename the downloaded dataset to `data.csv`.
 
 3. Run the `train.py` script to preprocess the data, train the model, and save it.
-<div style="background-color: #f2f2f2; padding: 20px; text-align: center;">
-    <h2>Model Evaluation Scores</h2>
-    <div style="display: flex; justify-content: space-around; margin-top: 20px;">
-        <div style="background-color: #4CAF50; color: white; padding: 15px; border-radius: 5px;">
-            <h3>MAE</h3>
-            <p style="font-size: 24px; margin: 0;">$384.23</p>
-        </div>
-        <div style="background-color: #3498db; color: white; padding: 15px; border-radius: 5px;">
-            <h3>R2</h3>
-            <p style="font-size: 24px; margin: 0;">0.60</p>
-        </div>
-    </div>
-</div>
+   <!-- @TODO: Below is not working on github markdown -->
+   <!-- <div style="background-color: #f2f2f2; padding: 20px; text-align: center;">
+       <h2>Model Evaluation Scores</h2>
+       <div style="display: flex; justify-content: space-around; margin-top: 20px;">
+           <div style="background-color: #4CAF50; color: white; padding: 15px; border-radius: 5px;">
+               <h3>MAE</h3>
+               <p style="font-size: 24px; margin: 0;">$384.23</p>
+           </div>
+           <div style="background-color: #3498db; color: white; padding: 15px; border-radius: 5px;">
+               <h3>R2</h3>
+               <p style="font-size: 24px; margin: 0;">0.60</p>
+           </div>
+       </div>
+   </div> -->
+
+<!-- ![Model Evaluation Scores](https://via.placeholder.com/600x200/f2f2f2/000000?text=MAE%3A%20%24384.23%20%20R2%3A%2060%) -->
+
+![Model Evaluation Scores](./docs/scores.png)
 
 4. Use the trained model to estimate laptop prices.
 

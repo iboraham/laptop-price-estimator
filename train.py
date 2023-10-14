@@ -8,8 +8,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
 
 # Load the data
-data = pd.read_csv('data.csv')
-
+data = pd.read_csv("data.csv")
 
 
 def _handle_cpu_speed(value):
@@ -17,22 +16,23 @@ def _handle_cpu_speed(value):
         return np.nan
 
     # Remove non-numeric characters
-    value = ''.join(filter(str.isdigit, str(value)))
+    value = "".join(filter(str.isdigit, str(value)))
 
     # Handle cases with multiple values, in this case, taking the average
-    if ',' in value:
-        values = value.split(',')
+    if "," in value:
+        values = value.split(",")
         value = sum(map(float, values)) / len(values)
 
     # Convert to float and convert GHz to MHz (if needed)
-    if 'GHz' in str(value):
-        value = float(value.replace('GHz', '')) * 1000
+    if "GHz" in str(value):
+        value = float(value.replace("GHz", "")) * 1000
     else:
         value = float(value)
-    
+
     return value
 
-def preprocess(data:pd.DataFrame)->pd.DataFrame:
+
+def preprocess(data: pd.DataFrame) -> pd.DataFrame:
     """
     This function preprocesses the input dataframe by performing the following operations in order:
         - Removing any duplicate rows
@@ -61,10 +61,10 @@ def preprocess(data:pd.DataFrame)->pd.DataFrame:
         cpu_brand: The brand of the CPU (OHE) e.g. cpu = Intel Core i5 -> cpu_brand = Intel
         x
 
-    
+
     Parameters:
     data (pd.DataFrame): The input dataframe to be preprocessed
-    
+
     Returns:
     pd.DataFrame: The preprocessed dataframe
     """
@@ -77,42 +77,67 @@ def preprocess(data:pd.DataFrame)->pd.DataFrame:
     data = data.drop(missing_cols, axis=1)
 
     # Create new columns
-    data['cpu_brand'] = data['cpu'].str.split().str[0]
+    data["cpu_brand"] = data["cpu"].str.split().str[0]
     # data['cpu_gen'] = data['cpu'].str.split().str[2].astype(float)
 
     # Convert categorical columns to one hot encoding
-    categorical_cols = ["brand", "model", "color", "cpu", "OS", "special_features", "graphics_coprocessor", "cpu_brand"]
+    categorical_cols = [
+        "brand",
+        "model",
+        "color",
+        "cpu",
+        "OS",
+        "special_features",
+        "graphics_coprocessor",
+        "cpu_brand",
+    ]
     categorical_cols = [col for col in categorical_cols if col in data.columns]
     encoder = OneHotEncoder()
-    data_encoded = pd.DataFrame(encoder.fit_transform(data[categorical_cols]).toarray(), columns=encoder.get_feature_names_out(categorical_cols))
+    data_encoded = pd.DataFrame(
+        encoder.fit_transform(data[categorical_cols]).toarray(),
+        columns=encoder.get_feature_names_out(categorical_cols),
+    )
     data = pd.concat([data.drop(categorical_cols, axis=1), data_encoded], axis=1)
 
     # Trim some columns to convert them to numeric values
-    data['screen_size'] = data['screen_size'].str.replace(' Inches', '').astype(float)
-    data['ram'] = data['ram'].str.replace(' MB', '').str.replace(' GB', '000').astype(float)
-    data['price'] = data['price'].str.replace('$', '').str.replace(',', '').astype(float)
-    data['harddisk'] = data['harddisk'].str.replace(' MB', '').str.replace(' GB', '000').str.replace(' TB', '000000').astype(float)
+    data["screen_size"] = data["screen_size"].str.replace(" Inches", "").astype(float)
+    data["ram"] = (
+        data["ram"].str.replace(" MB", "").str.replace(" GB", "000").astype(float)
+    )
+    data["price"] = (
+        data["price"].str.replace("$", "").str.replace(",", "").astype(float)
+    )
+    data["harddisk"] = (
+        data["harddisk"]
+        .str.replace(" MB", "")
+        .str.replace(" GB", "000")
+        .str.replace(" TB", "000000")
+        .astype(float)
+    )
 
     # Handle CPU speed
-    if 'cpu_speed' in data.columns:
-        data['cpu_speed'] = data['cpu_speed'].apply(_handle_cpu_speed)
+    if "cpu_speed" in data.columns:
+        data["cpu_speed"] = data["cpu_speed"].apply(_handle_cpu_speed)
 
     # Convert graphics to 0/1
-    data['graphics'] = data['graphics'].map({'Integrated': 0, 'Dedicated': 1})
+    data["graphics"] = data["graphics"].map({"Integrated": 0, "Dedicated": 1})
 
     # Remove any rows with missing values
-    data = data.dropna(axis=0, how='any')
+    data = data.dropna(axis=0, how="any")
 
     return data
 
-data = preprocess(data)[['ram', 'harddisk', 'screen_size', 'graphics', 'price', 'brand_Apple']]
+
+data = preprocess(data)[
+    ["ram", "harddisk", "screen_size", "graphics", "price", "brand_Apple"]
+]
 
 # Split the data into features and target
-X = data.drop('price', axis=1)
-y = data['price']
+X = data.drop("price", axis=1)
+y = data["price"]
 
 # Drop rows with any missing values
-X = X.dropna(axis=0, how='any')
+X = X.dropna(axis=0, how="any")
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
 print(X)
@@ -130,10 +155,17 @@ r2 = model.score(X_test, y_test)
 print(f"MAE: ${mae:,.2f}")
 print(f"R2: {r2:,.2f}")
 
-feature_importances = pd.DataFrame(model.feature_importances_, index=X_train.columns, columns=['importance']).sort_values('importance', ascending=False)
+# plot actual vs predicted prices
+from vis import plot
+
+plot(y_test, y_pred, r2, mae)
+
+feature_importances = pd.DataFrame(
+    model.feature_importances_, index=X_train.columns, columns=["importance"]
+).sort_values("importance", ascending=False)
 print(feature_importances)
 
 
 # Save the model
-with open('model.pkl', 'wb') as f:
+with open("model.pkl", "wb") as f:
     pickle.dump(model, f)
